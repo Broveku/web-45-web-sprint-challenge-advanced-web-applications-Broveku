@@ -4,10 +4,13 @@ import Bubbles from "./Bubbles";
 import ColorList from "./ColorList";
 import fetchColorService from '../services/fetchColorService';
 import axiosWithAuth from "../helpers/axiosWithAuth";
+import { useParams } from "react-router-dom";
 
-const BubblePage = () => {
+const BubblePage = (props) => {
   const [colors, setColors] = useState([]);
   const [editing, setEditing] = useState(false);
+
+  const {id} = useParams()
 
   useEffect(()=>{
     const getColor = async () =>{
@@ -22,10 +25,11 @@ const BubblePage = () => {
     setEditing(value);
   };
 
-  const saveEdit = (editColor) => {
+  const saveEdit = (editColor, e) => {
     axiosWithAuth().put('http://localhost:5000/api/colors/:id', editColor)
       .then(res =>{
-        setColors([ res.data])
+        let newColors = colors.filter(color=>color.id !== res.data.id, res.data)
+        setColors([...newColors, res.data])
       })
       .catch(err=>{
         console.log(err)
@@ -36,7 +40,7 @@ const BubblePage = () => {
   const deleteColor = (colorToDelete) => {
     axiosWithAuth().delete('http://localhost:5000/api/colors/:id', colorToDelete)
       .then(res=>{
-        console.log(res.data)
+        setColors(colors.filter((color)=>color.id !== res.config.id))
       })
       .catch(err=>{
         console.log(err)
